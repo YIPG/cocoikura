@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "地下",
-    "slug": "hudosan",
+    "name": "ここいくら",
+    "slug": "cocoikura",
     "privacy": "public",
     "sdkVersion": "32.0.0",
     "platforms": [
@@ -24,6 +24,8 @@
     ],
     "ios": {
       "supportsTablet": true
-    }
+    },
+    "description": "「ここいくら」は現在地の地価を表示するアプリです。\n\n様々な場所でお楽しみください。",
+    "githubUrl": "https://github.com/YIPG/cocoikura/tree/master"
   }
 }
