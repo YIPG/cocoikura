@@ -18,5 +18,6 @@
 <h4>pythonで先に地価とってきました</h4>
 地価取得.ipynb参照. :clap:
 
+
 <h2>チャート出したい :sushi:</h2>
 react-native-svg-chars使えば行けそう
