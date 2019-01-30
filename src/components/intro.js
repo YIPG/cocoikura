@@ -3,7 +3,9 @@ import {
   StyleSheet,
   View
 } from 'react-native';
+import firebase from 'firebase';
 import { Text, Button } from 'react-native-elements';
+import firebaseConfig from '../firebase/firebaseConfig';
 
 import Swiper from 'react-native-swiper';
 
