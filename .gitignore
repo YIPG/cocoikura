@@ -1,7 +1,10 @@
 node_modules/**/*
 .expo/*
 npm-debug.*
+yarn.lock
 *.jks
 *.p12
 *.key
 *.mobileprovision
+src/firebase/*
+citycodelist.json
