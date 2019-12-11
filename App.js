@@ -4,16 +4,14 @@ import {
   View,
   Dimensions,
   FlatList,
-  SectionList,
-  ScrollView,
-  Image,
   ActivityIndicator
 } from "react-native";
 import * as firebase from "firebase";
 import "firebase/firestore";
-import { Constants, Location, Permissions, Svg } from "expo";
+import * as Permissions from "expo-permissions";
+import * as Location from "expo-location";
 import * as Animatable from "react-native-animatable";
-import { Button, Text, Divider, List, ListItem } from "react-native-elements";
+import { Button, Text, ListItem } from "react-native-elements";
 import Intro from "./src/components/intro";
 import {
   createStackNavigator,
@@ -26,7 +24,6 @@ import firebaseConfig from "./src/firebase/firebaseConfig";
 import { Ionicons } from "@expo/vector-icons";
 
 import GraphScreen from "./src/components/graph";
-import axios from "axios";
 
 // class SignInScreen extends React.Component {
 //   static navigationOptions = {
@@ -189,7 +186,7 @@ class OtherScreen extends React.Component {
     try {
       // まず都道府県コードを取得
       let res = await fetch(
-        "http://geoapi.heartrails.com/api/json?method=searchByGeoLocation" +
+        "https://geoapi.heartrails.com/api/json?method=searchByGeoLocation" +
           `&x=${location.coords.longitude}&y=${location.coords.latitude}`
       );
       let resJson = await res.json();
@@ -215,11 +212,14 @@ class OtherScreen extends React.Component {
 
       // 次に市町村コードを取得
       let res1 = await fetch(
-        `http://www.land.mlit.go.jp/webland/api/CitySearch?area=${
-          this.state.areaCode
-        }`
+        `https://www.land.mlit.go.jp/webland/api/CitySearch?area=${this.state.areaCode}`
+      );
+
+      console.log(
+        `http://www.land.mlit.go.jp/webland/api/CitySearch?area=${this.state.areaCode}`
       );
       let res1Json = await res1.json();
+      console.log(res1Json);
       for (i = 0; i < res1Json.data.length; i++) {
         if (~this.state.city.indexOf(res1Json.data[i].name)) {
           console.log(`一致した市の名前は${res1Json.data[i].name}`);
@@ -339,12 +339,11 @@ class OtherScreen extends React.Component {
       <View style={styles.detailscreencontainer}>
         {loading ? (
           <Animatable.View
-            animation="fadeOut"
-            iterationCount={5}
-            direction="alternate"
-            useNativeDriver
+            animation="rubberBand"
+            duration={2000}
+            iterationCount="infinite"
           >
-            <Svg height={700} width={this.widthPerc(97)}>
+            {/* <Svg height={700} width={this.widthPerc(97)}>
               <Svg.Rect
                 x={(this.widthPerc(97) - 230) / 2}
                 y={70}
@@ -373,7 +372,8 @@ class OtherScreen extends React.Component {
                 height={400}
                 fill="#dee2e6"
               />
-            </Svg>
+            </Svg> */}
+            <ActivityIndicator size="large" color="#9DD6EB" />
           </Animatable.View>
         ) : (
           <View style={{ flex: 1 }}>
@@ -573,7 +573,8 @@ const styles = StyleSheet.create({
   },
   detailscreencontainer: {
     flex: 1,
-    flexDirection: "column"
+    flexDirection: "column",
+    justifyContent: "center"
   },
   title: {
     fontSize: 60,
@@ -628,7 +629,7 @@ const AppStack = createBottomTabNavigator(
   }
 );
 
-export default (RootNav = createAppContainer(
+export default RootNav = createAppContainer(
   createSwitchNavigator(
     {
       App: AppStack,
@@ -638,7 +639,7 @@ export default (RootNav = createAppContainer(
       initialRouteName: "Introduction"
     }
   )
-));
+);
 
 // export default class Root extends React.Component {
 //   constructor(){
