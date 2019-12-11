@@ -73,8 +73,13 @@ export default class Intro extends Component {
           </Text>
           <View style={styles.button}>
             <Button
-              borderRadius={50}
-              containerViewStyle={{ borderRadius: 50 }}
+              buttonStyle={{
+                height: 100,
+                width: 100,
+                borderRadius: 50,
+                color: "#9DD6EB"
+              }}
+              containerStyle={{ borderRadius: 50 }}
               fontWeight="bold"
               raised={true}
               backgroundColor="white"

@@ -91,7 +91,7 @@ class HomeScreen extends React.Component {
             <Button
               style={styles.mainButton}
               fontWeight="bold"
-              fontSize={90}
+              fontSize={100}
               raised={true}
               buttonStyle={{
                 height: 140,
