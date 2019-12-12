@@ -27,7 +27,7 @@
     "react-native-screens": "2.0.0-alpha.12",
     "react-native-svg": "9.13.3",
     "react-native-svg-charts": "^5.2.0",
-    "react-native-swiper": "^1.5.14"
+    "react-native-swiper": "^1.6.0-nightly.5"
   },
   "devDependencies": {
     "babel-preset-expo": "^8.0.0",
