@@ -4,7 +4,8 @@ import {
   View,
   Dimensions,
   FlatList,
-  ActivityIndicator
+  ActivityIndicator,
+  AsyncStorage
 } from "react-native";
 import * as firebase from "firebase";
 import "firebase/firestore";
@@ -46,15 +47,12 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
+// delete warning
+console.disableYellowBox = true;
+
 class HomeScreen extends React.Component {
   constructor() {
     super();
-
-    console.log("初期化完了");
-  }
-
-  componentDidMount() {
-    firebase.auth().signInAnonymously();
   }
 
   state = {
@@ -67,13 +65,18 @@ class HomeScreen extends React.Component {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status !== "granted") {
       this.setState({
-        errorMessage: "Permission to access location was denied"
+        errorMessage: "Permission to access location was denied",
+        loading: false
       });
+      console.log("だめじゃった");
+      return;
     }
+
+    console.log(status);
     this.setState({ loading: true });
     let location = await Location.getCurrentPositionAsync({});
-    console.log(location);
-    console.table(location);
+    console.log("位置情報取得完");
+    // console.log(location);
     this.setState({ loading: false });
     this.props.navigation.push("Other", {
       loc: location,
@@ -156,7 +159,8 @@ class OtherScreen extends React.Component {
     });
 
     const { loc } = this.props.route.params;
-    console.log(loc);
+    // console.log(loc);
+    // console.log("untii");
     this.getTheDetailOfLocation(loc);
     // console.log(this.state.areaCode);
     // this.getTheCityCode(this.state.areaCode);
@@ -190,7 +194,9 @@ class OtherScreen extends React.Component {
         town: resJson.response.location[0].town
       });
 
-      for (i = 0; i < 47; i++) {
+      console.log("__________________");
+
+      for (let i = 0; i < 47; i++) {
         if (
           CityCodeList.prefectures[i].name ===
           resJson.response.location[0].prefecture
@@ -201,6 +207,8 @@ class OtherScreen extends React.Component {
           break;
         }
       }
+
+      console.log("__________________");
       // 返ってくるデータは
       // {"city":"千代田区","city_kana":"ちよだく","town":"神田駿河台四丁目","town_kana":"かんだするがだい4ちょうめ","x":"139.764928","y":"35.698724","distance":247.69834334193078,"prefecture":"東京都","postal":"1010062"}
 
@@ -213,10 +221,8 @@ class OtherScreen extends React.Component {
         `http://www.land.mlit.go.jp/webland/api/CitySearch?area=${this.state.areaCode}`
       );
       let res1Json = await res1.json();
-      console.log(res1Json);
-      for (i = 0; i < res1Json.data.length; i++) {
+      for (let i = 0; i < res1Json.data.length; i++) {
         if (~this.state.city.indexOf(res1Json.data[i].name)) {
-          console.log(`一致した市の名前は${res1Json.data[i].name}`);
           this.setState({
             cityCode: res1Json.data[i].id
           });
@@ -255,7 +261,7 @@ class OtherScreen extends React.Component {
       let cnt = 0;
       let price_list = [];
 
-      for (data in this.state.firestoreData) {
+      for (let data in this.state.firestoreData) {
         if (this.state.firestoreData[data]["mean"]) {
           cnt += 1;
           sum += this.state.firestoreData[data]["mean"];
@@ -396,10 +402,10 @@ class OtherScreen extends React.Component {
   }
 }
 
-class IntroScreen extends React.Component {
-  render() {
-    return <Intro _onpress={() => this.props.navigation.navigate("App")} />;
-  }
+function IntroScreen() {
+  const { finishIntro } = React.useContext(AppContext);
+
+  return <Intro _onpress={() => finishIntro()} />;
 }
 
 class HistoryScreen extends React.Component {
@@ -501,7 +507,7 @@ class HistoryScreen extends React.Component {
               time: `${tmp_date.getFullYear()}年${tmp_date.getMonth() +
                 1}月${tmp_date.getDate()}日${tmp_date.getHours()}時${tmp_date.getMinutes()}分`
             };
-            console.log(tmpData);
+            // console.log(tmpData);
             this.setState({
               serverData: [...this.state.serverData, tmpData]
             });
@@ -543,6 +549,14 @@ class HistoryScreen extends React.Component {
       </View>
     );
   }
+}
+
+function ErrorScreen() {
+  return (
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <Text>エラーです。再起動してください。</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -595,7 +609,7 @@ function MainStackScreen() {
         name="Home"
         component={HomeScreen}
         options={{
-          title: "ボタンを押してみましょう"
+          title: "ホーム"
         }}
       />
       <MainStack.Screen
@@ -653,13 +667,82 @@ function MainTabScreen() {
 
 const RootStack = createStackNavigator();
 
-// TODO: show introduction when first launching.
+// Use Context API to handle error and auth issues.
+const AppContext = React.createContext();
+
 function RootStackScreen() {
+  const [state, dispatch] = React.useReducer(
+    (prevState, action) => {
+      switch (action.type) {
+        case "FINISH_INTRO":
+          return {
+            ...prevState,
+            finishIntro: true
+          };
+        case "RESTORE_FINISH_INTRO":
+          return {
+            ...prevState,
+            finishIntro: action.payload
+          };
+        case "ERROR_OCCURED":
+          return {
+            ...prevState,
+            error: action.error
+          };
+      }
+    },
+    {
+      error: null,
+      finishIntro: false
+    }
+  );
+
+  React.useEffect(() => {
+    // console.log("asdgad");
+    const bootStrapAsync = async () => {
+      let finishIntro;
+      try {
+        finishIntro = await AsyncStorage.getItem("finishIntro");
+        // console.log("finishIntro is ", finishIntro, Boolean(finishIntro));
+        dispatch({
+          type: "RESTORE_FINISH_INTRO",
+          payload: Boolean(finishIntro)
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    bootStrapAsync();
+  }, []);
+
+  React.useEffect(() => {
+    firebase.auth().signInAnonymously();
+    // console.log("ログイン完了しているよん");
+  });
+
+  const appContext = React.useMemo(
+    () => ({
+      finishIntro: async () => {
+        await AsyncStorage.setItem("finishIntro", "true");
+        dispatch({ type: "FINISH_INTRO" });
+      }
+    }),
+    []
+  );
+
   return (
-    <RootStack.Navigator headerMode="none">
-      <RootStack.Screen name="App" component={MainTabScreen} />
-      <RootStack.Screen name="Introduction" component={IntroScreen} />
-    </RootStack.Navigator>
+    <AppContext.Provider value={appContext}>
+      <RootStack.Navigator headerMode="none">
+        {state.error ? (
+          <RootStack.Screen name="error" compont={ErrorScreen} />
+        ) : !state.finishIntro ? (
+          <RootStack.Screen name="Introduction" component={IntroScreen} />
+        ) : (
+          <RootStack.Screen name="App" component={MainTabScreen} />
+        )}
+      </RootStack.Navigator>
+    </AppContext.Provider>
   );
 }
 
