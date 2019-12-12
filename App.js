@@ -653,6 +653,7 @@ function MainTabScreen() {
 
 const RootStack = createStackNavigator();
 
+// TODO: show introduction when first launching.
 function RootStackScreen() {
   return (
     <RootStack.Navigator headerMode="none">
@@ -667,14 +668,3 @@ export default function RootNav() {
     <NavigationNativeContainer>{RootStackScreen()}</NavigationNativeContainer>
   );
 }
-
-// export default class Root extends React.Component {
-//   constructor(){
-//     super();
-//     firebase.initializeApp(firebaseConfig);
-//   }
-
-//   render(){
-//     return RootNav
-//   }
-// }
