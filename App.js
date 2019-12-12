@@ -13,12 +13,10 @@ import * as Location from "expo-location";
 import * as Animatable from "react-native-animatable";
 import { Button, Text, ListItem } from "react-native-elements";
 import Intro from "./src/components/intro";
-import {
-  createStackNavigator,
-  createSwitchNavigator,
-  createBottomTabNavigator,
-  createAppContainer
-} from "react-navigation";
+import { NavigationNativeContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+
 import CityCodeList from "./src/prefecture.json";
 import firebaseConfig from "./src/firebase/firebaseConfig";
 import { Ionicons } from "@expo/vector-icons";
@@ -44,20 +42,20 @@ import GraphScreen from "./src/components/graph";
 //   };
 // }
 
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
 class HomeScreen extends React.Component {
   constructor() {
     super();
-    firebase.initializeApp(firebaseConfig);
+
     console.log("初期化完了");
   }
 
   componentDidMount() {
     firebase.auth().signInAnonymously();
   }
-
-  static navigationOptions = {
-    header: null
-  };
 
   state = {
     location: null,
@@ -130,10 +128,6 @@ class HomeScreen extends React.Component {
 }
 
 class OtherScreen extends React.Component {
-  static navigationOptions = {
-    title: "いくらでしたか？"
-  };
-
   state = {
     text: "waiting",
     prefecture: "",
@@ -161,9 +155,9 @@ class OtherScreen extends React.Component {
       }
     });
 
-    const locatio = this.props.navigation.getParam("loc", "no-loc");
-
-    this.getTheDetailOfLocation(locatio);
+    const { loc } = this.props.route.params;
+    console.log(loc);
+    this.getTheDetailOfLocation(loc);
     // console.log(this.state.areaCode);
     // this.getTheCityCode(this.state.areaCode);
     // console.log(this.state.cityCode);
@@ -409,10 +403,6 @@ class IntroScreen extends React.Component {
 }
 
 class HistoryScreen extends React.Component {
-  static navigationOptions = {
-    title: "履歴"
-  };
-
   state = {
     serverData: [],
     fetching_from_server: false,
@@ -596,50 +586,87 @@ const styles = StyleSheet.create({
   }
 });
 
-const MainStack = createStackNavigator({
-  Home: HomeScreen,
-  Other: OtherScreen
-});
+const MainStack = createStackNavigator();
 
-const AppStack = createBottomTabNavigator(
-  {
-    ホーム: MainStack,
-    履歴: HistoryScreen
-  },
-  {
-    defaultNavigationOptions: ({ navigation }) => ({
-      tabBarIcon: ({ focused, tintColor }) => {
-        const { routeName } = navigation.state;
-        let iconName;
-        if (routeName === "ホーム") {
-          iconName = `ios-home`;
-        } else if (routeName === "履歴") {
-          iconName = `ios-menu`;
+function MainStackScreen() {
+  return (
+    <MainStack.Navigator>
+      <MainStack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          title: "ボタンを押してみましょう"
+        }}
+      />
+      <MainStack.Screen
+        name="Other"
+        component={OtherScreen}
+        options={{
+          title: "いくらでしたか？"
+        }}
+      />
+    </MainStack.Navigator>
+  );
+}
+
+// for header title in tabbar nav, temporary using stack nav.
+const HistoryStack = createStackNavigator();
+function _HistoryScreen() {
+  return (
+    <HistoryStack.Navigator>
+      <HistoryStack.Screen name="履歴" component={HistoryScreen} />
+    </HistoryStack.Navigator>
+  );
+}
+//
+
+const MainTab = createBottomTabNavigator();
+
+function MainTabScreen() {
+  return (
+    <MainTab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          if (route.name === "ホーム") {
+            iconName = `ios-home`;
+          } else if (route.name === "履歴") {
+            iconName = `ios-menu`;
+          }
+
+          // You can return any component that you like here!
+          return <Ionicons name={iconName} size={size} color={color} />;
         }
+      })}
+      tabBarOptions={{
+        activeTintColor: "#9DD6EB",
+        inactiveTintColor: "gray"
+      }}
+    >
+      <MainTab.Screen name="ホーム" component={MainStackScreen} />
 
-        // You can return any component that you like here! We usually use an
-        // icon component from react-native-vector-icons
-        return <Ionicons name={iconName} size={25} color={tintColor} />;
-      }
-    }),
-    tabBarOptions: {
-      activeTintColor: "#9DD6EB",
-      inactiveTintColor: "gray"
-    }
-  }
-);
+      <MainTab.Screen name="履歴" component={_HistoryScreen} />
+    </MainTab.Navigator>
+  );
+}
 
-export default RootNav = createAppContainer(
-  createSwitchNavigator(
-    {
-      App: AppStack,
-      Introduction: IntroScreen
-    },
-    {
-      initialRouteName: "Introduction"
-    }
-  )
-);
+const RootStack = createStackNavigator();
+
+function RootStackScreen() {
+  return (
+    <RootStack.Navigator headerMode="none">
+      <RootStack.Screen name="App" component={MainTabScreen} />
+      <RootStack.Screen name="Introduction" component={IntroScreen} />
+    </RootStack.Navigator>
+  );
+}
+
+export default function RootNav() {
+  return (
+    <NavigationNativeContainer>{RootStackScreen()}</NavigationNativeContainer>
+  );
+}
 
 // export default class Root extends React.Component {
 //   constructor(){
