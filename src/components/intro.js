@@ -11,19 +11,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#9DD6EB"
+    backgroundColor: "#a8e8ff"
   },
   slide2: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#97CAE5"
+    backgroundColor: "#92e0fc"
   },
   slide3: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#9DD6EB"
+    backgroundColor: "#a8e8ff"
   },
   text: {
     color: "#fff",
@@ -78,14 +78,14 @@ export default class Intro extends Component {
                 height: 100,
                 width: 100,
                 borderRadius: 50,
-                color: "#9DD6EB"
+                backgroundColor: "white"
+              }}
+              titleStyle={{
+                fontWeight: "bold",
+                color: "#92e0fc"
               }}
               containerStyle={{ borderRadius: 50 }}
-              fontWeight="bold"
               raised={true}
-              backgroundColor="white"
-              color="#9DD6EB"
-              large
               title="使ってみる"
               onPress={this.props._onpress}
             />

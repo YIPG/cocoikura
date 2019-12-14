@@ -12,7 +12,7 @@ import "firebase/firestore";
 import * as Permissions from "expo-permissions";
 import * as Location from "expo-location";
 import * as Animatable from "react-native-animatable";
-import { Button, Text, ListItem } from "react-native-elements";
+import { Button, Text, ListItem, ThemeProvider } from "react-native-elements";
 import Intro from "./src/components/intro";
 import { NavigationNativeContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -84,27 +84,24 @@ class HomeScreen extends React.Component {
     });
   };
 
+  // TODO: adjust button style
   render() {
     return (
       <View style={styles.container}>
         {this.state.errorMessage === null ? (
           <View>
             <Button
-              style={styles.mainButton}
-              fontWeight="bold"
-              fontSize={100}
+              buttonStyle={styles.mainButton}
               raised={true}
-              buttonStyle={{
-                height: 140,
-                width: 140,
-                borderRadius: 70
+              titleStyle={{
+                fontWeight: "bold",
+                fontSize: 100,
+                color: "white"
               }}
+              containerStyle={styles.buttonContainerStyle}
               disabled={this.state.loading}
-              containerViewStyle={{ borderRadius: 70 }}
-              backgroundColor="#9DD6EB"
-              color="white"
-              large
-              borderBottom="solid 2px #b5b5b5"
+              disabledStyle={styles.disabledButton}
+              disabledTitleStyle={styles.disabledButtonText}
               title="$"
               onPress={() => this._getLocationAsync()}
             />
@@ -113,13 +110,13 @@ class HomeScreen extends React.Component {
           <View style={{ marginHorizontal: 20, flexWrap: "wrap" }}>
             <Text
               h2
-              style={{ display: "flex", color: "#9DD6EB", fontWeight: "bold" }}
+              style={{ display: "flex", color: "#a8e8ff", fontWeight: "bold" }}
             >
               接続のいいところで
             </Text>
             <Text
               h2
-              style={{ display: "flex", color: "#9DD6EB", fontWeight: "bold" }}
+              style={{ display: "flex", color: "#a8e8ff", fontWeight: "bold" }}
             >
               再起動してください
             </Text>
@@ -373,7 +370,7 @@ class OtherScreen extends React.Component {
                 fill="#dee2e6"
               />
             </Svg> */}
-            <ActivityIndicator size="large" color="#9DD6EB" />
+            <ActivityIndicator size="large" color="#a8e8ff" />
           </Animatable.View>
         ) : (
           <View style={{ flex: 1 }}>
@@ -528,7 +525,7 @@ class HistoryScreen extends React.Component {
     if (loading) {
       return (
         <View style={styles.container}>
-          <ActivityIndicator size="large" color="#9DD6EB" />
+          <ActivityIndicator size="large" color="#a8e8ff" />
         </View>
       );
     }
@@ -573,7 +570,23 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.27,
     shadowRadius: 4.65,
-    elevation: 6
+    elevation: 6,
+    height: 140,
+    width: 140,
+    borderRadius: 70,
+    backgroundColor: "#a8e8ff"
+  },
+  buttonContainerStyle: {
+    borderRadius: 70,
+    borderStyle: "solid",
+    borderBottomColor: "#b5b5b5",
+    borderBottomWidth: 2
+  },
+  disabledButton: {
+    backgroundColor: "#e3e3e3"
+  },
+  disabledButtonText: {
+    color: "white"
   },
   detailscreencontainer: {
     flex: 1,
@@ -654,7 +667,7 @@ function MainTabScreen() {
         }
       })}
       tabBarOptions={{
-        activeTintColor: "#9DD6EB",
+        activeTintColor: "#a8e8ff",
         inactiveTintColor: "gray"
       }}
     >
@@ -748,6 +761,8 @@ function RootStackScreen() {
 
 export default function RootNav() {
   return (
-    <NavigationNativeContainer>{RootStackScreen()}</NavigationNativeContainer>
+    <ThemeProvider>
+      <NavigationNativeContainer>{RootStackScreen()}</NavigationNativeContainer>
+    </ThemeProvider>
   );
 }
